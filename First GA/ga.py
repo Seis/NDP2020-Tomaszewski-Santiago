@@ -9,7 +9,6 @@ target="Tá fazendo mais estrago que ponto 40\nFazendo mais barulho que tiro de 
 
 
 
-
 def generateCleanParent(length): 
     genes = []
     while len(genes) < length:
