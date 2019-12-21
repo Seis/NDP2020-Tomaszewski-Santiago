@@ -40,3 +40,4 @@ def getBest(getFitness, targetLen, optimalFitness, geneSet, display):
             return child
         bestFitness = childFitness
         bestParent = child
+        
