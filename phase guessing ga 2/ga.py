@@ -13,11 +13,9 @@ numeroPais = 4
 generation = 0
 # define os caracteres possiveis
 geneSet="qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM'-,.@§çÇáÁéÉóÓãÃõÕêÊẽẼíÍ1234567890\n "
-# geneSet="luachei"
 # define o objetivo
-# target="luacheia"
-target="By the grace of the fire and the flames"
-
+target="Last things last\nBy the grace of the fire and the flames\nYou're the face of the future\nThe blood in my veins, oh-ooh\nThe blood in my veins, oh-ooh\nBut they never did, ever lived, ebbing and flowing\nInhibited, limited\nTill it broke open and rained down\nAnd rained down, like"
+target="baseado"
 def touplesSort(e):
   return e[2]
 
@@ -157,7 +155,8 @@ while True:
     #### encerra o algoritmo, ja que a melhor solucao tem todos os caracteres corretos
     if absoluteBestFitness >= len(target):
         os.system('cls' if os.name == 'nt' else 'clear')
-        print(absoluteBestCromossome + str(generation))
+        print(absoluteBestCromossome + " \n" + str(generation) + " geracoes\n" + str(datetime.datetime.now() - startTime))
+        return generation
         break
     # caso o melhor fitness nao esteja perfeito, ele e pelo menos melhor que seu pai
     #### portanto sera mantido para a proxima geracao
