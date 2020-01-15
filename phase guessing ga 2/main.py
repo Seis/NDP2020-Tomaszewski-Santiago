@@ -3,8 +3,8 @@ import ga
 results = []
 
 size = 10
-file = open("results for 10000 predefined ","w") 
-file.write("results for 10000 predefined")
+file = open("results for " + str(size) + " predefined ","w") 
+file.write("results for " + str(size) + " predefined")
 
 for x in range(1,size):
     results.append(ga.foneoq())
