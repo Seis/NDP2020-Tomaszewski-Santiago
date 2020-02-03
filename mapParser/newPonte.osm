@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<osm version="0.6" generator="CGImap 0.7.5 (23463 thorn-02.openstreetmap.org)" copyright="OpenStreetMap and contributors" attribution="http://www.openstreetmap.org/copyright" license="http://opendatacommons.org/licenses/odbl/1-0/">
- <bounds minlat="-27.5986100" minlon="-48.5671600" maxlat="-27.5968800" maxlon="-48.5624700"/>
+<osm version="0.6" generator="CGImap 0.7.5 (4638 thorn-01.openstreetmap.org)" copyright="OpenStreetMap and contributors" attribution="http://www.openstreetmap.org/copyright" license="http://opendatacommons.org/licenses/odbl/1-0/">
+ <bounds minlat="-27.5986200" minlon="-48.5673700" maxlat="-27.5969600" maxlon="-48.5644500"/>
  <node id="412417807" visible="true" version="13" changeset="44986282" timestamp="2017-01-07T19:12:15Z" user="adrianojbr" uid="2339960" lat="-27.5980713" lon="-48.5584378"/>
  <node id="412418455" visible="true" version="9" changeset="39231221" timestamp="2016-05-11T02:20:33Z" user="DoctorNeo" uid="3935294" lat="-27.5979785" lon="-48.5611990"/>
  <node id="412450387" visible="true" version="7" changeset="39231221" timestamp="2016-05-11T02:20:35Z" user="DoctorNeo" uid="3935294" lat="-27.5981713" lon="-48.5595627"/>
@@ -125,7 +125,6 @@
   <tag k="bicycle" v="no"/>
   <tag k="bridge" v="yes"/>
   <tag k="foot" v="no"/>
-  <tag k="1252.506527"/>
   <tag k="highway" v="trunk"/>
   <tag k="lanes" v="4"/>
   <tag k="layer" v="1"/>
@@ -158,7 +157,6 @@
   <tag k="name" v="Ponte Governador Colombo Machado Salles"/>
   <tag k="oneway" v="yes"/>
   <tag k="surface" v="asphalt"/>
-  <d length='1222.338833'/>
  </way>
  <way id="336936085" visible="true" version="5" changeset="60120461" timestamp="2018-06-24T13:08:22Z" user="nggz" uid="8445300">
   <nd ref="3440246066"/>
@@ -180,7 +178,6 @@
   <tag k="layer" v="1"/>
   <tag k="surface" v="asphalt"/>
   <tag k="width" v="2"/>
-  <d length='1083.545201'/>
  </way>
  <way id="376367894" visible="true" version="4" changeset="68151833" timestamp="2019-03-14T20:54:03Z" user="sesepusac" uid="9479604">
   <nd ref="3798039539"/>
