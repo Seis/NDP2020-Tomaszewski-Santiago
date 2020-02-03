@@ -1,18 +1,27 @@
 import untangle
-arquivo = untangle.parse("map.osm")
-wayList= arquivo.osm.way
+arquivo = untangle.parse("mapaponte_lenght.osm")
+waysFile = arquivo.osm.way
 
 
-for way in wayList:
+wayList = []
+wayCandidate = []
 
-    print("a---------------------------------")
-    print("e")
-    print(way)
-    print("b---------------------------------")
+for way in waysFile:
+    try:
+        wayCandidate.append(way.d["length"])
+    except Exception as e:
+        pass
+    for wayTag in way.tag:
+        if (wayTag["k"] == "lanes"):
+            wayCandidate.append(wayTag["v"])
+        if (wayTag["k"] == "name"):
+            wayCandidate.append(wayTag["v"])
+    if len(wayCandidate) == 3:
+        wayList.append(wayCandidate)
+        print(wayCandidate)
+    else:
+        for x in wayCandidate:
+            print(wayCandidate)
+    wayCandidate = []
 
-    for waya in way.tag:
-        if (waya["k"] == "lanes"):
-            print(waya["v"])
-        if (waya["k"] == "name"):
-            print(waya["v"])
-            continue
+print(len(wayList))
