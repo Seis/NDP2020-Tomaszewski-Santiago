@@ -1,29 +1,32 @@
-import untangle
 import sys
-
+import untangle
 arquivo = untangle.parse(str(sys.argv[1]))
+#arquivo = untangle.parse("newPonteLenght.osm")
+print("parsing")
+waysFile = arquivo.osm.way
 
-wayList= arquivo.osm.way
 
-laneList = []
-print("Gerando lista para " + str(sys.argv[1]))
-for way in wayList:
-    lane = []
+wayList = [[]]
+wayCandidate = []
+
+for way in waysFile:
     try:
-        for tag in way.tag:
-            if (tag["k"] == "lanes"):
-                lane.append(tag["v"])
-            if (tag["k"] == "name"):
-                lane.append(tag["v"])
-            if (len(lane) == 2):
-                laneList.append(lane)
-                lane = []
-                continue
-    except:
+        wayCandidate.append(way.d["length"])
+    except Exception as e:
         pass
 
-print(len(laneList))
-
-for lane in laneList:
-    file.write("\n" + str(lane[0]) +  " | " + str(lane[1]))
-file.close() 
+    try:
+        for wayTag in way.tag:
+            # if (wayTag["k"] == "lanes"):
+                # wayCandidate.append(wayTag["v"])
+            if (wayTag["k"] == "name"):
+                wayCandidate.append(wayTag["v"])
+    except:
+        pass
+    if len(wayCandidate) == 2:
+        wayList.append(wayCandidate)
+    wayCandidate = []
+for x in wayList:
+    for y in x:
+        print(y)
+    print("----")
