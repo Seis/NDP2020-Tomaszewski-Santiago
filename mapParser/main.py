@@ -2,31 +2,46 @@ import sys
 import untangle
 arquivo = untangle.parse(str(sys.argv[1]))
 #arquivo = untangle.parse("newPonteLenght.osm")
-print("parsing")
+# print("parsing")
 waysFile = arquivo.osm.way
 
 
-wayList = [[]]
-wayCandidate = []
+wayList = []
+incompleteLanes = 0
 
 for way in waysFile:
+    wayCandidate = []
+    length = 0
+    name = ""
+    lanes = 0
     try:
-        wayCandidate.append(way.d["length"])
+        length = way.d["length"]
     except Exception as e:
         pass
-
     try:
         for wayTag in way.tag:
-            # if (wayTag["k"] == "lanes"):
-                # wayCandidate.append(wayTag["v"])
+            if (wayTag["k"] == "lanes"):
+                lanes = wayTag["v"]
             if (wayTag["k"] == "name"):
-                wayCandidate.append(wayTag["v"])
+                name = wayTag["v"]
     except:
         pass
-    if len(wayCandidate) == 2:
-        wayList.append(wayCandidate)
-    wayCandidate = []
+
+    if length != 0:
+        if name != "":
+            wayCandidate.append(length)
+            wayCandidate.append(name)
+            if lanes == 0:
+                lanes = 2
+                incompleteLanes+=1
+            wayCandidate.append(lanes)
+    if len(wayCandidate) == 3:
+        wayList.append((wayCandidate))
 for x in wayList:
+    # print(x)
     for y in x:
         print(y)
     print("----")
+if incompleteLanes:
+    print(str(incompleteLanes) + " ruas no arquivo não possuem informações sobre o número de vias")
+    print("Para esses casos assume-se 2 vias (ida e volta)")
