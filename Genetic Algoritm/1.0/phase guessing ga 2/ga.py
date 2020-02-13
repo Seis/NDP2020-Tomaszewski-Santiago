@@ -1,3 +1,6 @@
+# coding=UTF-8
+
+
 # sorteios
 import random
 # avaliacao de tempo
@@ -86,7 +89,6 @@ def foneoq():
     geneSet="qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM'-,.@§çÇáÁéÉóÓãÃõÕêÊẽẼíÍ1234567890\n "
     # define o objetivo
     target="Last things last\nBy the grace of the fire and the flames\nYou're the face of the future\nThe blood in my veins, oh-ooh\nThe blood in my veins, oh-ooh\nBut they never did, ever lived, ebbing and flowing\nInhibited, limited\nTill it broke open and rained down\nAnd rained down, like"
-    target="baseado em fatos reais"
 
 
 
