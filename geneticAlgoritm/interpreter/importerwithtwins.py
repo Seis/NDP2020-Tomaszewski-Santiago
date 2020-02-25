@@ -1,6 +1,5 @@
 import re
 import numpy as np
-import aux as a
 
 file = open("output", "r")
 lines = file.readlines()
@@ -46,6 +45,25 @@ def fileProcess():
 
     return wayFile
 
+def getCromossomo(waylist):
+    cromossomo = []
+    wayId = []
+    wayLanes =[]
+    wayOpossite = []
+    wayPresent = []
+    for way in waylist:
+        wayId.append(way[0])
+        wayLanes.append(way[2])
+        wayOpossite.append(way[4])
+        wayPresent.append(False)
+    for x in zip():
+        pass
+    return length, lanes
+
+
+
+
+
 def getLengthLanes(waylist):
     length = []
     lanes = []
@@ -73,18 +91,43 @@ def getTransitionMatrix():
 
     return transitionProbability
 
+def calculeAutoLoop():
+    lengthList = []
+    for x in wayFile:
+        lengthList.append(x[1])
 
+    minimumLength = min(lengthList)
+    tt = [] #normalizedLengths
+    for x in wayFile:
+        tt.append(x[1]/minimumLength)
+
+    autoloop = []
+    for x in tt:
+        autoloop.append((x-1)/x)
+    return autoloop
+
+def insertAutoLoop(transitionProbability):
+    transitionProbabilityAuto = np.matrix.copy(transitionProbability)
+    autoloop = calculeAutoLoop()
+
+    for x in range(0,len(wayFile)):
+        for y in range(0,len(wayFile)):
+            if x != y:
+                transitionProbabilityAuto[x][y] = (1-autoloop[x])*transitionProbabilityAuto[x][y]
+            else:
+                transitionProbabilityAuto[x][y] = autoloop[x]
+    return transitionProbabilityAuto
 
 def processInput():
     wayFile = fileProcess()
     pAccent = getTransitionMatrix()
-    P = a.insertAutoLoop(pAccent,wayFile)
+    P = insertAutoLoop(pAccent)
 
     wayInfos = []
 
-    #id comprimento  num lanes e via oposta
+    #id comprimento e num lanes
     for x in wayFile:
-        wayInfos.append([x[0],x[1],x[2],x[4]])
+        wayInfos.append([x[0],x[1],x[2]])
 
 
     return wayInfos, pAccent, P
