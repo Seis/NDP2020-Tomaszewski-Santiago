@@ -1,6 +1,7 @@
 import numpy as np
 
 def getSteadyVector(p):
+    # return V for v.p = v
     dim = p.shape[0]
     q = (p-np.eye(dim))
     ones = np.ones(dim)
@@ -39,14 +40,10 @@ def insertAutoLoop(transitionProbability,wayFile):
 
 def getCromossomo(waylist):
     cromossomo = []
-    indexIdList = []
     idIndexList = []
-
     usedWays = []
 
-
     for x in range(0,len(waylist)):
-        indexIdList.append((x,waylist[x][0]))
         idIndexList.append((waylist[x][0],x))
     idIndexList = dict(idIndexList)
 
@@ -56,11 +53,14 @@ def getCromossomo(waylist):
         else:
             #extrai o cromossomo
             # print(way)
-            geneA = (way[0],way[2])
-            geneB = (way[3],waylist[idIndexList[way[3]]][2]) 
+            try:
+                geneA = (way[0],way[2])
+                geneB = (way[3],waylist[idIndexList[way[3]]][2]) 
+            except Exception as e:
+                # define -1 como oposto de vias mao unica
+                geneB = (-1,0)
+
             gene = (geneA,geneB)
-            # indexGeneB = idIndexList[way[3]]
-            # print(waylist[idIndexList[way[3]]][2])
             usedWays.append(way[0])
             usedWays.append(way[3])
             cromossomo.append(gene)
@@ -68,20 +68,24 @@ def getCromossomo(waylist):
     return cromossomo
 
 
+def getLengthLanes(waylist):
+    length = []
+    lanes = []
+    for x in waylist:
+        length.append(x[1])
+        lanes.append(x[2])
+    return length, lanes
 
 
+def getDensidade(wayfile, numVeiculos, probEstatica):
+    densidade = []
 
+    length, lanes = getLengthLanes(wayfile)
+       
+    for (lengthIndividual, laneIndividual , pii) in zip(length, lanes, probEstatica):
+        try:
+            densidade.append((numVeiculos*pii)/(laneIndividual*lengthIndividual))
+        except Exception as e:
+            densidade.append(0)
 
-
-
-
-
-
-
-# def indexToId(index, indexIdList):
-#     wayId = indexIdList[index][1]
-#     return wayId
-
-# def idToIndex(wayId, idIndexList):
-#     wayIndex = idIndexList[wayId]
-#     return wayIndex
+    return densidade

@@ -1,31 +1,23 @@
 import importer as i
-import numpy as np
-import math
-from scipy import linalg as la
 import aux as a
 
-wayfile, p, pa = i.processInput()
-length, lanes = i.getLengthLanes(wayfile)
+wayfile, p, pa = i.processInput("output")
 
 pi = a.getSteadyVector(pa)
-nv = 100
-
-densidade = []
+numVeiculos = 100
 
 
-   
-for (lengthIndividual, laneIndividual , pii) in zip(length, lanes, pi):
-    try:
-        densidade.append((nv*pii)/(laneIndividual*lengthIndividual))
-    except Exception as e:
-        densidade.append(0)
 
-cromossomo = a.getCromossomo(wayfile)
 
-for a in densidade:
-    print(a)
 
-print(cromossomo)
+densidade = a.getDensidade(wayfile, numVeiculos, pi)
+
+cromossomoInicial = a.getCromossomo(wayfile)
+
+for x in densidade:
+    print(x)
+
+print(cromossomoInicial)
 
 
 
