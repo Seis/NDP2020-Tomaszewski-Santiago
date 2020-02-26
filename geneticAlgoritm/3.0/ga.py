@@ -25,7 +25,6 @@ def mutate(cromossomoOriginal):
     if genepB[0] == -1: #caso a mutacao seja em um cromossomo "solitario" ela falha
         return cromossomo
 
-
     if random.choice([0,1]):
         genepA = (genepA[0], genepA[1] + genepB[1])
         genepB = (genepB[0], 0)
@@ -55,51 +54,83 @@ def crossover(listaPais):
 def getIndex1(item):
     return item[1]
 
-def selecaoPais(populacao):
+def getOrderedPopulacaoFitness(populacao):
     populacaoFitness = []
-    fitnessTotal = 0
     for x in populacao:
-        fitnessX = fitness(x)
-        fitnessTotal += fitnessX
-        populacaoFitness.append((x, fitnessX))
+        populacaoFitness.append((x, fitness(x)))
+
+    populacaoFitness = sorted(populacaoFitness, key=getIndex1)
+    return populacaoFitness
+
+def selecaoPais(populacao):
+    populacaoFitness = getOrderedPopulacaoFitness(populacao)
 
     populacaoFitnessReverso = []
-
     for x in populacaoFitness:
-        fitnessX = x[1]
-        fitnessInversoX = fitnessTotal / fitnessX
-        populacaoFitnessReverso.append((x, fitnessInversoX))
-
-    populacaoFitnessReverso = sorted(populacaoFitnessReverso, key=getIndex1)
-
-
-    # wip
+        fitnessInversoX = populacaoFitness[0][1] / x[1] # melhor (menor) fitness / fitness[x]
+        populacaoFitnessReverso.append((x[0], x[1], fitnessInversoX))
 
     proximaGeracao = []
-
-    while len(proximaGeracao) < len(populacao/2):
-        for x in populacao:
-            if random.uniform(pais[0], pais[-1]) < x:
-                proximaGeracao.append(1)
-                print(len(proximaGeracao))
-                if len(proximaGeracao) >= len(populacao/2):
+    while len(proximaGeracao) < len(populacao)/2:
+        for x in populacaoFitnessReverso:
+            # sorteio = random.uniform(populacaoFitness[0][1], populacaoFitness[-1][1]) #abaixo sugestao para menor elitismo
+            sorteio = random.uniform(populacaoFitness[0][1], populacaoFitness[-1][1] + x[2])
+            if sorteio < x[2]:
+                proximaGeracao.append(x[0])
+                if len(proximaGeracao) >= len(populacao)/2:
                     break
     return(proximaGeracao)
 
+def proximaGeracao(populacao):
+    populacaoFitness = getOrderedPopulacaoFitness(populacao)
+    indice1 = int(len(populacaoFitness)*0.2) # top 20%
+    indice2 = int(len(populacaoFitness)*0.8) # top 80%
 
+    t1 = populacaoFitness[:indice1]          # top 20% melhores
+    t2 = populacaoFitness[indice1:indice2]   # top 80% melhores - top 20% melhores8
+    t3 = populacaoFitness[indice2:]          # top 20% piores
+
+    proximaGeracao = []
+    for parcelaPopulacao, probabilidade in zip([t1,t2,t3],[0.75,0.50,0.25]):
+        # permanece .75 de t1 , .50 de t2 e .25 de t3
+        sobreviventes = []
+        tamanhoFinalParcela = len(parcelaPopulacao) * probabilidade
+        while len(sobreviventes) < tamanhoFinalParcela:
+            for x in parcelaPopulacao:
+                if random.choice([0,1]):
+                    sobreviventes.append(x[0])
+                    if len(sobreviventes) >= tamanhoFinalParcela:
+                        break
+        proximaGeracao.extend(sobreviventes)
+    return proximaGeracao
+
+
+def fitness(cromossomo):
+    return dumbFitness()
+
+def dumbFitness():
+    return random.uniform(0,1)
 
 
 
 cs = [((1, 2), (2, 2)), ((3, 2), (4, 2)), ((5, 2), (6, 2)), ((7, 1), (8, 1)), ((9, 1), (10, 1)),((11, 2), (12, 2)), ((13, 2), (14, 2)), ((15, 2), (16, 2)), ((17, 1), (-1, 0))]
 
-seti = gerarSetInicial(cs,5)
+seti = gerarSetInicial(cs,20)
+
+
+pg = proximaGeracao(seti)
+# print(seti)
+for x in pg:
+    print(x)
+
+
 
 # for x in seti:
 #     print(x)
 
 # print('----------------------------------------------')
 
-print(crossover(seti))
+# print(crossover(seti))
 
 
 # crossover(cs,cs)
