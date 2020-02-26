@@ -1,23 +1,49 @@
 # coding: U8
 import ga
 import stringSets
-# enUsSet
-# fullSet
 
-# isoSet = "qwertyuiopasdfghjklzxcvbnm"
-# capitalIsoSet = "QWERTYUIOPASDFGHJKLZXCVBNM"
-# numberSet = "1234567890"
-# acentSet = "áéíóúãẽõĩũâêîôûàèìòùç"
-# capitalAcentSet = "ÁÉÍÓÚÃẼĨÕŨÂÊÎÔÛÀÈÌÒÙÇ"
-# specialSet = "',.?()!-\n "
-# superSpecialSet = ";<>:/\|[]{}=+_*&$$#@"
 
-# enUsSet = isoSet + capitalIsoSet + numberSet + specialSet
-# fullSet = isoSet + capitalIsoSet + numberSet + acentSet + capitalAcentSet + specialSet + superSpecialSet
+
+
+import importer as i
+import aux as a
+
 
 # inicializa numero de geracao
 generation = 0
-# define os caracteres possiveis
+
+target = 2
+
+def roadGaPrepare(numVeiculos):
+    wayfile, p, pa = i.processInput("output")
+    pi = a.getSteadyVector(pa)
+    densidadeInicial = a.getDensidade(wayfile, numVeiculos, pi)
+
+    cromossomoInicial = a.getCromossomo(wayfile)
+
+    return cromossomoInicial, densidadeInicial,wayfile
+
+def roadGa():
+    ancestrais = 
+
+
+
+
+wayfile, p, pa = i.processInput("output")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 geneSet = stringSets.enUsSet
 
@@ -35,7 +61,7 @@ target="Another head hangs lowly"
 def runGa():
     ancestrais = []
     numeroAncestrais = 10000
-    for x in xrange(0,numeroAncestrais):
+    for x in range(0,numeroAncestrais):
         parent = ga.generateParent(len(target), geneSet)
         ancestrais.append(parent)
     return ga.inicialize(geneSet, generation, target, ancestrais)

@@ -1,179 +1,117 @@
-# coding: utf8
-
-import sys
 # sorteios
 import random
-# avaliacao de tempo
-import datetime
-# sleep
-import time
-# limpar tela
-import os
 
-geneSet = ""
-target = ""
+def gerarSetInicial(cromossomoOriginal, quantidade):
+    setCromossomos = []
+    for x in range(0, quantidade):
+        cromossomo = list.copy(cromossomoOriginal)
+        if random.choice(range(0,5)): #chance de mutacao de 3/4
+            nMutacoes = random.choice(range(1,4))# limite de 4 mutacoes
+            while nMutacoes > 0:
+                cromossomo = mutate(cromossomo)
+                nMutacoes-=1
+        setCromossomos.append(cromossomo)
+    return setCromossomos
 
-def cleanScreen():
-    os.system('cls' if os.name == 'nt' else 'clear')
+def mutate(cromossomoOriginal):
+    cromossomo = list.copy(cromossomoOriginal)
+    tamanhoCromossomo = len(cromossomo)
+    pontoMutacao = random.choice(range(0,tamanhoCromossomo))
+    gene = cromossomo[pontoMutacao] #((3, 2), (4, 2))
 
-# gera um indivíduo todo char de tamanho lenght
-def generateStandartParent(length, char): 
-    genes = []
-    while len(genes) < length:
-        genes.extend(char)
-    return ''.join(genes)
+    genepA = gene[0]  # (3, 2)
+    genepB = gene[1]  # (4, 2)
 
-# gera um indivíduo aleatorio de tamanho lenght
-def generateParent(length, gs):
-    # define os genes de um pai como vazio
-    genes = []
-    # ocorre o numero necessario de vezes para que o pai tenha lenght genes
-    while len(genes) < length:
-        # define o tamanho da amostra como o minimo entre o numero de genes que faltam
-        # e o numero de genes diponiveis na pool
-        sampleSize = min(length - len(genes), len(gs))
-        # estende a lista de genes do pai com a quantidade definida acima,
-        # com elementos tirados aleatoriamente do geneSet
-        genes.extend(random.sample(gs, sampleSize))
-    #retorna genes como uma string
-    return ''.join(genes)
-
-# retorna o numero de caracteres certos em guess comparado a target
-def getFitness(guess):
-    # caracteres corretos
-    correct = 0
-    # gera uma tupla com (expected, atual) para cada entrada em (target, guess)
-    # e percorre todas as tuplas
-    for (expected,atual) in zip(target, guess):
-        # soma para cada correto
-        if expected == atual:
-            correct += 1
-    # retorna numero de acertos
-    return correct
-
-# cria uma mutacao de um cromossomo em parent a partir de um ponto aleatorio
-def applyMutation (parentsTuplesList):
-    index = 0
-    newParentsTuplesList = []
-    for parentTuple in parentsTuplesList:
-        parent = parentTuple[0]
-        # define aleatoriamente um ponto de mutacao dentro do parent
-        index = random.randrange(0, len(parent))
-        # cria um filho com os genes do parent
-        childGenes = list(parent)
-        # cria uma lista com 2 elementos aleatorios (draws diferentes) de geneSet
-        # e atribui o primeiro a newGene e o segundo a alternate
-        newGene, alternate = random.sample(geneSet,2)
-        # newGene = random.sample(getGeneSet(), 1)
-        # alternate = random.sample(getGeneSet(), 1)
-        # se o gene atual for igual a mutacao sorteada, usa o sorteio alternativo
-        childGenes[index] = alternate \
-            if newGene == childGenes[index] \
-            else newGene
-        # <codigo equivalente ao acima> nao condensado
-        # if childGenes[index] != newGene:
-        #     childFitness[index] = newGene
-        # else
-        #     childFitness[index] = alternate
-        # <!codigo equivalente ao acima>
-        newParent = ''.join(childGenes)
-        newParentFitness = getFitness(newParent)
-        newParentTuple = (newParent, newParentFitness)
-        newParentsTuplesList.append(newParentTuple)
+    if genepB[0] == -1: #caso a mutacao seja em um cromossomo "solitario" ela falha
+        return cromossomo
 
 
+    if random.choice([0,1]):
+        genepA = (genepA[0], genepA[1] + genepB[1])
+        genepB = (genepB[0], 0)
+    else:
+        genepB = (genepB[0], genepA[1] + genepB[1])
+        genepA = (genepA[0], 0)
 
-    # retorna genes como uma string
-    return newParentsTuplesList
+    gene = (genepA,genepB)
+    cromossomo[pontoMutacao] = gene
+    return cromossomo
 
-def display(guess, startTime, generation):
-    # calcula tempo atual - tempo de inicio
-    timeDiff = datetime.datetime.now() - startTime
-    # limpa tela (cls para windows, clear para outros)
-    # imprime no formato "guess numeroDaGeracao"
-    print("{0}\n{1} generations - {2}".format(guess[0], generation,timeDiff))
-    # print("{0}\t{1}\t{2}".format(guess, fitness, str(timeDiff)))
+def crossover(listaPais):
+    cromossomoA, cromossomoB = listaPais[0], listaPais[1]
 
-def applyCrossover(listaTuplasPais):
-    # crossover mistura 1/2 a 1/2 em todos
-    # retorna lista com 1 filho mutado de cada 
-    childsTuplesList = []
-    for x in xrange(0,(len(listaTuplasPais)),2):
-        pai1 = listaTuplasPais[x][0]
-        try:
-            pai2 = listaTuplasPais[x+1][0]
+    tamanhoCromossomo = len(cromossomoA)
+    pontoMutacao = random.choice(range(0,tamanhoCromossomo))
+    filhoA = cromossomoA[:pontoMutacao]
+    for x in cromossomoB[pontoMutacao:]:
+        filhoA.append(x)
 
-            meio = len(pai1) // 2
+    filhoB = cromossomoB[:pontoMutacao]
+    for x in cromossomoA[pontoMutacao:]:
+        filhoB.append(x)
 
-            filho1 = pai1[:meio] + pai2[meio:len(pai1)]
-            filho2 = pai2[:meio] + pai1[meio:len(pai1)]
-            childsTuplesList.append((filho1, getFitness(filho1)))
-            childsTuplesList.append((filho2, getFitness(filho2)))
-        except Exception as e:
-            childsTuplesList.append((pai1, getFitness(pai1)))
-    return childsTuplesList
+    return filhoA, filhoB
 
-# usado na ordenacao em nextGeneration
-def getKeyFitness(item):
+def getIndex1(item):
     return item[1]
 
-def nextGeneration(listaTuplas):
-    # retorna os top 50%
-    listaTuplas = sorted(listaTuplas, key=getKeyFitness)
-    newGeneration = []
-    for x in listaTuplas[(len(listaTuplas)/2):]:
-        newGeneration.append(x)
-    return newGeneration
+def selecaoPais(populacao):
+    populacaoFitness = []
+    fitnessTotal = 0
+    for x in populacao:
+        fitnessX = fitness(x)
+        fitnessTotal += fitnessX
+        populacaoFitness.append((x, fitnessX))
 
-def inicialize(gs, generation, tg, ancestrais):
-    global geneSet
-    global target
-    geneSet = gs
-    target = tg
+    populacaoFitnessReverso = []
 
-    # inicializa o random
-    random.seed()
-    # define o startTime com a hora atual
-    startTime = datetime.datetime.now()
+    for x in populacaoFitness:
+        fitnessX = x[1]
+        fitnessInversoX = fitnessTotal / fitnessX
+        populacaoFitnessReverso.append((x, fitnessInversoX))
 
-    fitnessMax = len(target)
+    populacaoFitnessReverso = sorted(populacaoFitnessReverso, key=getIndex1)
 
-    bestFitness = 0
-    bestParent = ''
-    parentsTuplesList = []
 
-    # armazena o fitness dos pais
+    # wip
 
-    if len(target) < ancestrais:
-        pass
-    for parent in ancestrais:
-        fitnessAncestral = getFitness(parent)
-        pai = (parent, fitnessAncestral)
-        parentsTuplesList.append(pai)
-        # define o primeiro melhor pai (como um conjunto de genes do mesmo tamanho do alvo,
-        # mas todos " ")
-        if fitnessAncestral > bestParent:
-            bestParent = parent
-            bestFitness = parentsFitness[-1]
+    proximaGeracao = []
 
-    while bestFitness < fitnessMax:
-        # crossover (gera uma lista de filhos com uma mutacao)
-        childsTuplesList = applyCrossover(parentsTuplesList)
-        # junta pais aos filhos
-        parentsTuplesList.extend(childsTuplesList)
-        # selecao de pais
-        
-        parentsTuplesList = applyMutation(parentsTuplesList)
+    while len(proximaGeracao) < len(populacao/2):
+        for x in populacao:
+            if random.uniform(pais[0], pais[-1]) < x:
+                proximaGeracao.append(1)
+                print(len(proximaGeracao))
+                if len(proximaGeracao) >= len(populacao/2):
+                    break
+    return(proximaGeracao)
 
-        parentsTuplesList = nextGeneration(parentsTuplesList)
-        # aumenta o contador de geracoes
-        generation += 1
-        print(parentsTuplesList[-1])
-        print(generation)
-        bestFitness = parentsTuplesList[-1][1]
 
-        #### rinse and repeat
-    cleanScreen()
-    display(parentsTuplesList[-1], startTime, generation)
 
-    return generation
+
+
+cs = [((1, 2), (2, 2)), ((3, 2), (4, 2)), ((5, 2), (6, 2)), ((7, 1), (8, 1)), ((9, 1), (10, 1)),((11, 2), (12, 2)), ((13, 2), (14, 2)), ((15, 2), (16, 2)), ((17, 1), (-1, 0))]
+
+seti = gerarSetInicial(cs,5)
+
+# for x in seti:
+#     print(x)
+
+# print('----------------------------------------------')
+
+print(crossover(seti))
+
+
+# crossover(cs,cs)
+
+
+# gerarSetInicial(cs,2)
+
+
+
+
+
+
+# [((1, 2), (2, 2)), ((3, 2), (4, 2)), ((5, 2), (6, 2)), ((7, 1), (8, 1)), ((9, 1), (10, 1)),
+# ((11, 2), (12, 2)), ((13, 2), (14, 2)), ((15, 2), (16, 2))]
+

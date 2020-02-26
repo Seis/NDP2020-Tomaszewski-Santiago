@@ -1,0 +1,44 @@
+wip
+
+a = [3.3636363636363638, 4.625, 4.933333333333333, 7.4, 10.57142857142857, 18.5]
+maxi = max(a)
+
+b = []
+for x in a:
+    b.append(x/maxi)
+
+def fon():
+    c = []
+    for x in a:
+        if random.uniform(a[0], a[-1]) < x:
+            c.append(x)
+    print(c)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+pais = [3.3636363636363638, 4.625, 4.933333333333333, 7.4, 10.57142857142857, 18.5]
+
+def fon():
+    quero = 5
+    saida = []
+    while len(saida) < quero:
+        for x in pais:
+            if random.uniform(pais[0], pais[-1]) < x:
+                saida.append(int(x))
+                print(len(saida))
+                if len(saida) >= quero:
+                    break
+    print(saida)
