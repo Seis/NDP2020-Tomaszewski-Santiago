@@ -89,25 +89,3 @@ def getDensidade(wayfile, numVeiculos, probEstatica):
             densidade.append(0)
 
     return densidade
-
-def fitness(cromossomo, matrizOriginal, wayfile, numVeiculos):
-    tamanhoCromossomo = len(cromossomo[0]*2)
-    xd = cromossomo[1]
-    sdvec = []
-    for i in range(0,tamanhoCromossomo):
-        sdi = 0
-        if xd[i][i]:
-            for j in range(0,tamanhoCromossomo):
-                sdi += (matrizOriginal[i][j] * xd[j][j])
-        else:
-            sdi = 1
-        sdvec.append(1/sdi)
-    sd = np.diag(sdvec)
-
-    pcircunflexo = sd.dot(xd.dot(matrizOriginal.dot(xd)))
-
-    steadyvector = getSteadyVector(pcircunflexo)
-
-    fitness = max(getDensidade(wayfile, numVeiculos, steadyvector))
-
-    return fitness
