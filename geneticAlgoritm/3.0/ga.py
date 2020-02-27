@@ -1,10 +1,13 @@
 # sorteios
 import random
+import numpy as np
+import aux
 
 def gerarSetInicial(cromossomoOriginal, quantidade):
     setCromossomos = []
+    tamanhoCromossomo = len(cromossomoOriginal)
     for x in range(0, quantidade):
-        cromossomo = list.copy(cromossomoOriginal)
+        cromossomo = (list.copy(cromossomoOriginal),np.diag(np.ones(tamanhoCromossomo)))
         if random.choice(range(0,5)): #chance de mutacao de 3/4
             nMutacoes = random.choice(range(1,4))# limite de 4 mutacoes
             while nMutacoes > 0:
@@ -15,9 +18,10 @@ def gerarSetInicial(cromossomoOriginal, quantidade):
 
 def mutate(cromossomoOriginal):
     cromossomo = list.copy(cromossomoOriginal)
-    tamanhoCromossomo = len(cromossomo)
+    tamanhoCromossomo = len(cromossomo[0])
+    registroMutacao = cromossomo[1]
     pontoMutacao = random.choice(range(0,tamanhoCromossomo))
-    gene = cromossomo[pontoMutacao] #((3, 2), (4, 2))
+    gene = cromossomo[0][pontoMutacao] #((3, 2), (4, 2))
 
     genepA = gene[0]  # (3, 2)
     genepB = gene[1]  # (4, 2)
@@ -28,28 +32,32 @@ def mutate(cromossomoOriginal):
     if random.choice([0,1]):
         genepA = (genepA[0], genepA[1] + genepB[1])
         genepB = (genepB[0], 0)
+        registroMutacao[pontoMutacao][pontoMutacao] = 0
     else:
         genepB = (genepB[0], genepA[1] + genepB[1])
         genepA = (genepA[0], 0)
+        registroMutacao[pontoMutacao+1][pontoMutacao+1] = 0
 
     gene = (genepA,genepB)
-    cromossomo[pontoMutacao] = gene
+    cromossomo[0][pontoMutacao] = gene
     return cromossomo
 
 def crossover(listaPais):
     cromossomoA, cromossomoB = listaPais[0], listaPais[1]
 
-    tamanhoCromossomo = len(cromossomoA)
+    tamanhoCromossomo = len(cromossomoA[0])
     pontoMutacao = random.choice(range(0,tamanhoCromossomo))
-    filhoA = cromossomoA[:pontoMutacao]
-    for x in cromossomoB[pontoMutacao:]:
-        filhoA.append(x)
+    filhoA = cromossomoA[0][:pontoMutacao]
+    registroA = cromossomoA[1][:pontoMutacao]
+    filhoA.extend(cromossomoB[0][pontoMutacao:])
+    registroA.extend(cromossomoB[1][pontoMutacao:])
 
     filhoB = cromossomoB[:pontoMutacao]
-    for x in cromossomoA[pontoMutacao:]:
-        filhoB.append(x)
+    registroB = cromossomoB[1][:pontoMutacao]
+    filhoB.extend(cromossomoA[0][:pontoMutacao])
+    registroA.extend(cromossomoA[1][:pontoMutacao])
 
-    return filhoA, filhoB
+    return (filhoA, registroA), (filhoB, registroB)
 
 def getIndex1(item):
     return item[1]
@@ -104,9 +112,42 @@ def proximaGeracao(populacao):
         proximaGeracao.extend(sobreviventes)
     return proximaGeracao
 
+def getxdpxd(cromossomo, matrizOriginal):
+    xd = np.diag(cromossomo[1])
+    pxd = np.dot(matrizOriginal, xd)
+    xdpxd = np.dot(xd, matrizOriginal)
+    return xdpxd
 
-def fitness(cromossomo):
-    return dumbFitness()
+def getsd(cromossomo, matrizOriginal):
+    tamanhoCromossomo = len(cromossomo[0])
+    xd = np.diag(cromossomo[1])
+    sdvec = []
+    for i in range(0,tamanhoCromossomo):
+        xdij = 0
+        if xd[i]:
+            for (j, xdij) in zip(range(0,tamanhoCromossomo), xd):
+                xdij += (matrizOriginal[i][j] * xdij)
+        else:
+            xdij = 1
+        sdvec.append(0)
+    sd = np.diag(sdvec)
+    return sd
+
+def getpcircunflexo(cromossomo, matrizOriginal):
+    sd = getsd(cromossomo, matrizOriginal)
+    xdpxd = getxdpxd(cromossomo, matrizOriginal)
+    pcircunflexo = np.dot(sd,xdpxd)
+    return pcircunflexo
+
+def fitness(cromossomo, matrizOriginal, wayFile, numVeiculos):
+    pcircunflexo = getpcircunflexo(cromossomo, matrizOriginal)
+    steadyvector = aux.getSteadyVector(pcircunflexo)
+    densidade = aux.getDensidade(wayfile, numVeiculos, steadyvector):
+
+    fitness = max(densidade)
+
+    # return dumbFitness()
+    return fitness
 
 def dumbFitness():
     return random.uniform(0,1)
