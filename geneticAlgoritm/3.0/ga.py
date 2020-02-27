@@ -2,22 +2,25 @@
 import random
 import numpy as np
 import aux
+import importer
 
 def gerarSetInicial(cromossomoOriginal, quantidade):
     setCromossomos = []
+
     tamanhoCromossomo = len(cromossomoOriginal)
+    
     for x in range(0, quantidade):
-        cromossomo = (list.copy(cromossomoOriginal),np.diag(np.ones(tamanhoCromossomo)))
-        if random.choice(range(0,5)): #chance de mutacao de 3/4
-            nMutacoes = random.choice(range(1,4))# limite de 4 mutacoes
-            while nMutacoes > 0:
-                cromossomo = mutate(cromossomo)
-                nMutacoes-=1
+        cromossomo = (list.copy(cromossomoOriginal),np.diag(np.ones(tamanhoCromossomo*2)))
+        # if random.choice(range(0,5)): #chance de mutacao de 3/4
+        #     nMutacoes = random.choice(range(1,4))# limite de 4 mutacoes
+        #     while nMutacoes > 0:
+        #         cromossomo = mutate(cromossomo)
+        #         nMutacoes-=1
         setCromossomos.append(cromossomo)
     return setCromossomos
 
 def mutate(cromossomoOriginal):
-    cromossomo = list.copy(cromossomoOriginal)
+    cromossomo = cromossomoOriginal
     tamanhoCromossomo = len(cromossomo[0])
     registroMutacao = cromossomo[1]
     pontoMutacao = random.choice(range(0,tamanhoCromossomo))
@@ -62,10 +65,10 @@ def crossover(listaPais):
 def getIndex1(item):
     return item[1]
 
-def getOrderedPopulacaoFitness(populacao):
+def getOrderedPopulacaoFitness(populacao, matrizOriginal, wayFile, numVeiculos):
     populacaoFitness = []
     for x in populacao:
-        populacaoFitness.append((x, fitness(x)))
+        populacaoFitness.append((x, fitness(x, matrizOriginal, wayFile, numVeiculos)))
 
     populacaoFitness = sorted(populacaoFitness, key=getIndex1)
     return populacaoFitness
@@ -89,8 +92,8 @@ def selecaoPais(populacao):
                     break
     return(proximaGeracao)
 
-def proximaGeracao(populacao):
-    populacaoFitness = getOrderedPopulacaoFitness(populacao)
+def proximaGeracao(populacao, matrizOriginal, wayFile, numVeiculos):
+    populacaoFitness = getOrderedPopulacaoFitness(populacao, matrizOriginal, wayFile, numVeiculos)
     indice1 = int(len(populacaoFitness)*0.2) # top 20%
     indice2 = int(len(populacaoFitness)*0.8) # top 80%
 
@@ -112,57 +115,29 @@ def proximaGeracao(populacao):
         proximaGeracao.extend(sobreviventes)
     return proximaGeracao
 
-def getxdpxd(cromossomo, matrizOriginal):
-    xd = np.diag(cromossomo[1])
-    pxd = np.dot(matrizOriginal, xd)
-    xdpxd = np.dot(xd, matrizOriginal)
-    return xdpxd
-
-def getsd(cromossomo, matrizOriginal):
-    tamanhoCromossomo = len(cromossomo[0])
-    xd = np.diag(cromossomo[1])
-    sdvec = []
-    for i in range(0,tamanhoCromossomo):
-        xdij = 0
-        if xd[i]:
-            for (j, xdij) in zip(range(0,tamanhoCromossomo), xd):
-                xdij += (matrizOriginal[i][j] * xdij)
-        else:
-            xdij = 1
-        sdvec.append(0)
-    sd = np.diag(sdvec)
-    return sd
-
-def getpcircunflexo(cromossomo, matrizOriginal):
-    sd = getsd(cromossomo, matrizOriginal)
-    xdpxd = getxdpxd(cromossomo, matrizOriginal)
-    pcircunflexo = np.dot(sd,xdpxd)
-    return pcircunflexo
-
 def fitness(cromossomo, matrizOriginal, wayFile, numVeiculos):
-    pcircunflexo = getpcircunflexo(cromossomo, matrizOriginal)
-    steadyvector = aux.getSteadyVector(pcircunflexo)
-    densidade = aux.getDensidade(wayfile, numVeiculos, steadyvector):
-
-    fitness = max(densidade)
-
     # return dumbFitness()
-    return fitness
+    return aux.fitness(cromossomo, matrizOriginal, wayFile, numVeiculos)
 
 def dumbFitness():
     return random.uniform(0,1)
 
 
 
-cs = [((1, 2), (2, 2)), ((3, 2), (4, 2)), ((5, 2), (6, 2)), ((7, 1), (8, 1)), ((9, 1), (10, 1)),((11, 2), (12, 2)), ((13, 2), (14, 2)), ((15, 2), (16, 2)), ((17, 1), (-1, 0))]
+cs = [((1, 2), (2, 2)), ((3, 2), (4, 2)), ((5, 2), (6, 2)), ((7, 1), (8, 1)), ((9, 1), (10, 1)),((11, 2), (12, 2)), ((13, 2), (14, 2)), ((15, 2), (16, 2))]
+
+numVeiculos = 100
 
 seti = gerarSetInicial(cs,20)
+wayfile, pa, p = importer.processInput("output")
+# pg = proximaGeracao(seti,pa, wayfile, numVeiculos)
+# # print(seti)
+# for x in pg:
+#     print(x)
+teste = (cs, np.diag([1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,1]))
 
-
-pg = proximaGeracao(seti)
-# print(seti)
-for x in pg:
-    print(x)
+a = fitness(teste, p, wayfile, numVeiculos)
+print(a)
 
 
 
