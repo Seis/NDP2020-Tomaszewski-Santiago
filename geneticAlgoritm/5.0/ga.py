@@ -196,12 +196,12 @@ def resultado(populacao, matrizOriginal, wayFile, numVeiculos):
     # print(best[0][1])
     # print(best[0][0][0])
 
-tamanhoPopulacao = 20000
-geracoes = 5000
+tamanhoPopulacao = 200
+geracoes = 500
 numeroVeiculos = 250
 
 
-wayfile, matrizOriginal = importer.processInput("wayInfo")
+wayfile, matrizOriginal = importer.processInput("newWayInfo")
 # wayfile, matrizOriginal = importer.processInput("wayInfo")
 solucaoInicial = (aux.getCromossomo(wayfile))
 populacao = gerarSetInicial(solucaoInicial,tamanhoPopulacao)
@@ -258,5 +258,5 @@ for x in opora:
     for y, i in zip(x[0], range(0,len(x[0]))):
         if y == 0:
             changes += str(i+1) + " "
-    changes += "the density is " + str(x[1])
+    changes += "the density is " + "{0:.2f}".format(round(x[1],2))
     print(changes)
