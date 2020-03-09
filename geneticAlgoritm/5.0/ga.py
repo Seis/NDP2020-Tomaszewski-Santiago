@@ -5,6 +5,14 @@ import aux
 import importer
 import sys
 import os
+import time
+
+originalMaxDensity = 0
+
+betterSolutions = []
+betterDensities = []
+
+
 
 melhorFitness = 50000
 listabest = []
@@ -84,24 +92,17 @@ def getIndex1(item):
 
 def getOrderedPopulacaoFitness(populacao, matrizOriginal, wayFile, numVeiculos):
     populacaoFitness = []
+    start = time.time()
     for x in populacao:
         try:
             populacaoFitness.append((x, fitness(x, matrizOriginal, wayFile, numVeiculos)))
-
-            populacaoFitness = sorted(populacaoFitness, key=getIndex1)
-            global listabest
-            global listafit
-            if populacaoFitness[-1][1] in listafit:
-                pass
-            else:
-                listafit.append(populacaoFitness[-1][1])
-                listabest.append(populacaoFitness[-1][0])
         except Exception as e:
             raise e
             print(x)
-
-
-
+    print(str(time.time() - start) + " gopf calc fit")
+    start = time.time()
+    populacaoFitness = sorted(populacaoFitness, key=getIndex1)
+    print(str(time.time() - start) + " gopf sort")
     return populacaoFitness
 
 def selecaoPais(populacao, matrizOriginal, wayFile, numVeiculos):
@@ -124,10 +125,16 @@ def selecaoPais(populacao, matrizOriginal, wayFile, numVeiculos):
     return(proximaGeracao)
 
 def proximaGeracao(populacao, matrizOriginal, wayFile, numVeiculos, solucaoInicial):
+    start = time.time()
     populacaoFitness = getOrderedPopulacaoFitness(populacao, matrizOriginal, wayFile, numVeiculos)
     indice1 = int(len(populacaoFitness)*0.2) # top 20%
     indice2 = int(len(populacaoFitness)*0.8) # top 80%
+    print(str(time.time() - start) + " pg start")
 
+
+
+
+    start = time.time()
     t1 = populacaoFitness[:indice1]          # top 20% melhores
     t2 = populacaoFitness[indice1:indice2]   # top 80% melhores - top 20% melhores8
     t3 = populacaoFitness[indice2:]          # top 20% piores
@@ -137,11 +144,15 @@ def proximaGeracao(populacao, matrizOriginal, wayFile, numVeiculos, solucaoInici
     proximaGeracao.append(t1[0][0])
     proximaGeracao.append((solucaoInicial,np.diag(np.ones(len(solucaoInicial)*2))))
 
+    print(str(time.time() - start) + " pg until for")
 
     for parcelaPopulacao, probabilidade in zip([t1,t2,t3],[0.75,0.50,0.25]):
         # permanece .75 de t1 , .50 de t2 e .25 de t3
+        start = time.time()
         sobreviventes = []
         tamanhoFinalParcela = len(parcelaPopulacao) * probabilidade
+        if probabilidade == 0.75:
+            tamanhoFinalParcela -= 2
         while len(sobreviventes) < tamanhoFinalParcela:
             for x in parcelaPopulacao:
                 if random.choice([0,1]):
@@ -149,12 +160,11 @@ def proximaGeracao(populacao, matrizOriginal, wayFile, numVeiculos, solucaoInici
                     if len(sobreviventes) >= tamanhoFinalParcela:
                         break
         proximaGeracao.extend(sobreviventes)
+        print(str(time.time() - start) + " pg for")
     return proximaGeracao
 
 def fitness(cromossomo, matrizOriginal, wayFile, numVeiculos):
-    global melhorFitness
-
-    # print(tamanhoCromossomo)
+    start = time.time()
     tamanhoCromossomo = len(cromossomo[0]*2)
     xd = cromossomo[1]
     sdvec = []
@@ -172,18 +182,33 @@ def fitness(cromossomo, matrizOriginal, wayFile, numVeiculos):
     sd = np.diag(sdvec)
 
     pcircunflexo = sd.dot(xd.dot(matrizOriginal.dot(xd)))
+    print(str(time.time() - start) + " fit ate pcirc")
 
+
+    start = time.time()
     try:
+        start = time.time()
         steadyvector = aux.getSteadyVector(pcircunflexo)
+        print(str(time.time() - start) + " fit gsv")
+
+        start = time.time()
         listaDensidades = aux.getDensidade(wayFile, numVeiculos, steadyvector)
+        print(str(time.time() - start) + " fit get getDensidade")
+
+        start = time.time()
+        fitness = max(listaDensidades)
+        print(str(time.time() - start) + " max listd")
     except Exception as e:
-        listaDensidades = [sys.maxsize]
+        fitness = [sys.maxsize]
         # print (pcircunflexo)
         # raise e
+    print(str(time.time() - start) + " fit fim")
 
     # lista de densidades do cromossomo
     # fitness e a maior densidade da lista
-    fitness = max(listaDensidades)
+
+    if fitness < originalMaxDensity:
+        pass
 
     return fitness
 
@@ -196,67 +221,72 @@ def resultado(populacao, matrizOriginal, wayFile, numVeiculos):
     # print(best[0][1])
     # print(best[0][0][0])
 
-tamanhoPopulacao = 200
-geracoes = 500
-numeroVeiculos = 250
-
-
-wayfile, matrizOriginal = importer.processInput("newWayInfo")
-# wayfile, matrizOriginal = importer.processInput("wayInfo")
-solucaoInicial = (aux.getCromossomo(wayfile))
-populacao = gerarSetInicial(solucaoInicial,tamanhoPopulacao)
-
-originalDensity = fitness((solucaoInicial,np.diag(np.ones(len(solucaoInicial)*2))), matrizOriginal, wayfile, numeroVeiculos)
-
-# sys.exit()
-
-for geracao in range(0,geracoes):
-    pais = selecaoPais(populacao, matrizOriginal, wayfile, numeroVeiculos)
-    # print('hfon')
-    #reproduz
-    filhos = []
-    for i in range(0, len(pais), 2):
-        x = pais[i]
-        try:
-            y = pais[i+1]
-            filhos.extend(crossover([x,y]))
-        except Exception as e:
-            filhos.append(x)
-    populacao = pais
-    for x in filhos:
-        populacao.append(x)
-
-    populacao = proximaGeracao(populacao, matrizOriginal, wayfile, numeroVeiculos, solucaoInicial)
-
-
-    if (geracao % 100) == 0:
-        print(geracoes-geracao)
-
-# print('best')
-# resultado(populacao, matrizOriginal, wayfile, numeroVeiculos)
-
-opora = []
-for x,y in zip(listabest, listafit):
-    opora.append((np.diag(x[1]), y))
-
-# opora.getOrderedPopulacaoFitness
-
-opora = sorted(opora, key=getIndex1)
+def run(sizePopulation, generationLimit, veicleCount, roadFile):
+    global originalMaxDensity
 
 
 
+    start = time.time()
+    wayfile, matrizOriginal = importer.processInput(roadFile)
+    print(str(time.time() - start) + " processInput")
+    # wayfile, matrizOriginal = importer.processInput("wayInfo")
+    
+
+    start = time.time()
 
 
 
-os.system('cls' if os.name == 'nt' else 'clear')
+    solucaoInicial = (aux.getCromossomo(wayfile))
+    populacao = gerarSetInicial(solucaoInicial,sizePopulation)
 
-print('the original density is ' + str(originalDensity))
-print(len(opora))
+    originalMaxDensity = fitness((solucaoInicial,np.diag(np.ones(len(solucaoInicial)*2))), matrizOriginal, wayfile, veicleCount)
 
-for x in opora:
-    changes = "reversing "
-    for y, i in zip(x[0], range(0,len(x[0]))):
-        if y == 0:
-            changes += str(i+1) + " "
-    changes += "the density is " + "{0:.2f}".format(round(x[1],2))
-    print(changes)
+    print(str(time.time() - start) + " getCromossomo, gerarSetInicial")
+    for geracao in range(0,generationLimit):
+        start = time.time()
+        pais = selecaoPais(populacao, matrizOriginal, wayfile, veicleCount)
+        print(str(time.time() - start) + " selecaoPais")
+        #reproduz
+        filhos = []
+        start = time.time()
+        for i in range(0, len(pais), 2):
+            x = pais[i]
+            try:
+                y = pais[i+1]
+                filhos.extend(crossover([x,y]))
+                filhos.extend(crossover([x,y]))
+            except Exception as e:
+                filhos.append(x)
+        # populacao = pais
+        for x in filhos:
+            populacao.append(x)
+        print(str(time.time() - start) + " filharada")
+
+        start = time.time()
+        populacao = proximaGeracao(populacao, matrizOriginal, wayfile, veicleCount, solucaoInicial)
+        print(str(time.time() - start) + " proximaGeracao")
+
+        if (geracao % 100) == 0:
+            sys.exit()
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print(str(generationLimit-geracao) + " generations remaining")
+    # print('best')
+    # resultado(populacao, matrizOriginal, wayfile, veicleCount)
+
+    opora = []
+    for x,y in zip(listabest, listafit):
+        opora.append((np.diag(x[1]), y))
+
+    opora = sorted(opora, key=getIndex1)
+
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print('the original density is ' + str(originalMaxDensity))
+    print(len(opora))
+
+    for x in opora:
+        changes = "reversing "
+        for y, i in zip(x[0], range(0,len(x[0]))):
+            if y == 0:
+                changes += str(i+1) + " "
+        changes += "the density is " + "{0:.2f}".format(round(x[1],2))
+        print(changes)
